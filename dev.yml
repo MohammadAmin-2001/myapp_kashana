@@ -1,0 +1,50 @@
+version: '3.9'
+
+services:
+  django:
+    build: 
+      context: .
+      dockerfile: ./compose/dev/django/Dockerfile
+    env_file:
+      - "./envs/dev/.django"
+    image: dev-django
+    container_name : dev-django
+    ports:
+      - '7100:8000'
+    command:  ./dev.sh
+
+  bot:
+    build:
+        context: .
+        dockerfile: ./compose/dev/bot/Dockerfile
+    image: dev-bot
+    container_name : dev-bot
+    restart: always
+    env_file:
+      - "./envs/dev/.bot"
+    command: ./dev.sh
+    depends_on: 
+     - mongo
+  
+  mongo:
+    image: mongo
+    restart: always
+    volumes:
+    - dev_mongo_data:/data/db
+    container_name : dev-mongo
+    env_file:
+      - "./envs/dev/.mongo"
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    container_name : dev-mongo-express
+    ports:
+      - 8081:8081
+    env_file:
+      - "./envs/dev/.mongo"
+    depends_on:
+      - mongo
+
+volumes:
+  dev_mongo_data: {}
